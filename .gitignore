@@ -1,0 +1,21 @@
+# CMake and Build directories
+cmake-build-*/
+build/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+*.cmake
+
+# IDE configurations
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.user
+
+# Compiled binaries and build artifacts
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.lib
+*.exp
