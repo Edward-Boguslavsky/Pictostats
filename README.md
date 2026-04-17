@@ -6,6 +6,7 @@ Due to the app being written in C++ combined with the open-source graphics libra
 ## Examples
 
 ### Default Dashboard
-
+<img width="800" alt="Screenshot of dashboard with default settings" src="https://github.com/user-attachments/assets/a10919e3-07d7-43a4-8a51-60169ab1d045" />
 
 ### Real Life Example
+<img width="800" alt="Dashboard displayed on a 5&quot; screen" src="https://github.com/user-attachments/assets/13144373-44f0-45d6-a370-09ccd3fd1e0a" />
