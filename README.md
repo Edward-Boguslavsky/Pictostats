@@ -1,20 +1,11 @@
-# Paper Monitor
- A system information monitor with a clean, modern UI. So far, this project is still in its concept art phase and will begin development once public interest is gathered
+# Pictostats *(formerly Paper Monitor)*
+A user friendly tool to make your own tiny dashboard to display your PC's stats
 
-The app will be written with Electron.js and will use Sebastian Hildebrandt's [systeminformation.io](https://systeminformation.io/) library to gather system information
+Due to the app being written in C++ combined with the open-source graphics library [ImGUI](https://github.com/ocornut/imgui), it only uses <1% of your CPU and GPU! To read your PC's sensors, *Pictostats* uses [LibreHardwareMonitorLib](https://github.com/LibreHardwaRemonitor/LibreHardwareMonitor) which has been ported to C++ by the amazing [OpenRGB](https://github.com/calcprogrammer1/openrgb) team
 
-***THIS IS STILL A WORK IN PROGRESS***
+## Examples
 
-## Screenshots
+### Default Dashboard
 
-### Different UI Layouts
 
-![UI mockup 2](https://github.com/Edward-Boguslavsky/Paper-Monitor/blob/main/ui_mockup2.png?raw=true)
-
-### Custom Colour Schemes
-
-![UI mockup](https://github.com/Edward-Boguslavsky/Paper-Monitor/blob/main/ui_mockup.png?raw=true)
-
-### Running on an External Display
-
-![External screen mockup](https://github.com/Edward-Boguslavsky/Paper-Monitor/blob/main/external_screen_mockup.png?raw=true)
+### Real Life Example
