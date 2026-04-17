@@ -10,7 +10,6 @@
 int HardwareBackend::s_RamSticks = 0;
 int HardwareBackend::s_StorageDrives = 0;
 
-// Multithreading globals
 static std::unordered_map<std::string, float> s_SensorCache;
 static std::mutex s_CacheMutex;
 static std::atomic<bool> s_Running{false};
@@ -25,10 +24,8 @@ void HardwareBackend::Init() {
         else if (kv.first.find("/nvme/") != std::string::npos || kv.first.find("SSD") != std::string::npos || kv.first.find("HDD") != std::string::npos) s_StorageDrives++;
     }
 
-    // Start the 1Hz Background Polling Thread!
     s_Running = true;
     s_WorkerThread = std::thread([]() {
-        // Required for WMI wrappers on background threads
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
         while(s_Running) {
@@ -38,13 +35,11 @@ void HardwareBackend::Init() {
                 for(auto& kv : s_SensorCache) pathsToPoll.push_back(kv.first);
             }
 
-            // Query the hardware (This is the slow part, but it's safely in the background now!)
             std::unordered_map<std::string, float> newValues;
             for(const auto& path : pathsToPoll) {
                 newValues[path] = LHWM::GetSensorValue(path);
             }
 
-            // Save back to cache
             {
                 std::lock_guard<std::mutex> lock(s_CacheMutex);
                 for(const auto& kv : newValues) s_SensorCache[kv.first] = kv.second;
@@ -64,16 +59,15 @@ void HardwareBackend::Shutdown() {
 void HardwareBackend::RegisterSensor(const std::string& path) {
     if(path.empty()) return;
     std::lock_guard<std::mutex> lock(s_CacheMutex);
-    if(s_SensorCache.find(path) == s_SensorCache.end()) s_SensorCache[path] = 0.0f; // Initialize to 0
+    if(s_SensorCache.find(path) == s_SensorCache.end()) s_SensorCache[path] = 0.0f;
 }
 
 float HardwareBackend::GetSensorValue(const std::string& path) {
     if (path.empty()) return 0.0f;
     std::lock_guard<std::mutex> lock(s_CacheMutex);
-    return s_SensorCache[path]; // Return the instant cached value!
+    return s_SensorCache[path];
 }
 
-// ... Keep the exact same GetUsedRamGB, GetTotalRamGB, and GetTotalSystemPowerW from before!
 float HardwareBackend::GetUsedRamGB() { return GetSensorValue("/ram/data/0"); }
 float HardwareBackend::GetTotalRamGB() { return GetSensorValue("/ram/data/0") + GetSensorValue("/ram/data/1"); }
 

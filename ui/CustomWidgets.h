@@ -11,7 +11,6 @@ namespace CustomWidgets {
                                    ImU32 bgColor, ImU32 fgColor, ImFont* valFont, ImFont* labelFont,
                                    ImU32 labelColor, const char* valueText);
 
-    // Now accepts all the same parameters as the Arc!
     void DrawRoundedLinearProgressBar(const char* label, float progress, float width, float height,
                                       ImU32 bgColor, ImU32 fgColor, ImFont* valFont, ImFont* labelFont,
                                       ImU32 labelColor, const char* valueText);

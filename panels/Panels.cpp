@@ -87,7 +87,6 @@ void RamPanel::Draw() {
     float totalRAM = HardwareBackend::GetTotalRamGB();
     float progress = totalRAM > 0.0f ? (usedRAM / totalRAM) : 0.0f;
     std::vector<SensorData> data = {
-        // 🌟 TWEAKED: Removed the decimal!
         { progress, FormatStr("%.0f GB", usedRAM), "USAGE" }
     };
     RenderVisuals(data);

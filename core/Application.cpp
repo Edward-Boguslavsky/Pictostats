@@ -10,10 +10,8 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 
-// THE FIX: Forward declare the ImGui Win32 handler OUTSIDE the anonymous namespace!
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// --- Anonymous Namespace to hide these globals from the rest of the app ---
 namespace {
     HWND g_hwnd = nullptr;
     ID3D11Device* g_pd3dDevice = nullptr;
@@ -68,9 +66,7 @@ namespace {
             case WM_DESTROY: ::PostQuitMessage(0); g_AppDone = true; return 0;
         } return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
-} // end anonymous namespace
-
-// --- Class Implementation ---
+}
 
 Application::Application(const char* title) : m_Title(title), m_Width(800), m_Height(480), m_Running(true) {}
 
@@ -118,10 +114,6 @@ void Application::Close() {
 
 void Application::Run(std::function<void()> uiCallback) {
     while (m_Running && !g_AppDone) {
-
-        // 🌟 NEW: Smart Idle Throttling
-        // If the window isn't focused, sleep the rendering thread up to 250ms (4 FPS).
-        // If a mouse event happens before 250ms, it instantly wakes up!
         if (GetForegroundWindow() != g_hwnd) {
             MsgWaitForMultipleObjects(0, NULL, FALSE, 250, QS_ALLINPUT);
         }

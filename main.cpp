@@ -25,7 +25,6 @@ int main()
     ImGuiIO& io = ImGui::GetIO();
 
     Theme::fontHugeTitle = io.Fonts->AddFontFromFileTTF("fonts/Blinker-ExtraBold.ttf", 48.0f * Theme::GlobalScale);
-    // 🌟 REVERTED: Subtitle is back to PPFraktionSans-Bold!
     Theme::fontTitle     = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Bold.otf", 28.0f * Theme::GlobalScale);
     Theme::fontValue     = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Light.otf", 48.0f * Theme::GlobalScale);
     Theme::fontLabel     = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Bold.otf", 28.0f * Theme::GlobalScale);
@@ -59,7 +58,6 @@ int main()
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImU32 gridColor = ImGui::ColorConvertFloat4ToU32(Theme::TextDark);
 
-            // 🌟 TWEAKED: Increased the cross size from 4.0 to 10.0 so the arms are much longer!
             float crossSize = 10.0f * Theme::GlobalScale;
 
             int xCount = std::ceil(centerX / snapGrid);

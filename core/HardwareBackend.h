@@ -9,9 +9,8 @@
 class HardwareBackend {
 public:
     static void Init();
-    static void Shutdown(); // Safely closes the background thread
+    static void Shutdown();
 
-    // Panels must register their paths so the background thread knows what to poll!
     static void RegisterSensor(const std::string& path);
     static float GetSensorValue(const std::string& path);
 

@@ -18,7 +18,6 @@ struct SensorData {
 
 class Panel {
 public:
-    // 🌟 Added columnSpan parameter!
     Panel(std::string windowID, std::string shortName, std::string title, ImU32 themeColor, PanelStyle style, int columnSpan);
     virtual ~Panel() = default;
 
@@ -33,7 +32,7 @@ protected:
     std::string m_Title;
     ImU32 m_ThemeColor;
     PanelStyle m_Style;
-    int m_ColumnSpan; // 🌟 How many Lego units wide is this panel?
+    int m_ColumnSpan;
 
     void DrawHeader();
     void RenderVisuals(const std::vector<SensorData>& sensors);

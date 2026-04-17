@@ -13,10 +13,9 @@ public:
 
     bool Init();
 
-    // This takes your custom UI code and runs it 60 times a second
     void Run(std::function<void()> uiCallback);
 
-    void Close(); // Safely closes the app
+    void Close();
 
     int GetWidth() const { return m_Width; }
     int GetHeight() const { return m_Height; }

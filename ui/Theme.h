@@ -23,8 +23,8 @@ namespace Theme {
     inline ImU32 AccentYellow     = IM_COL_FROM_RGB(255, 193, 7);
     inline ImU32 TextMuted        = IM_COL_FROM_RGB(140, 140, 140);
 
-    inline float GlobalScale = 1.0f;
-    inline float BaseUnit    = 55.0f; // 🌟 Halved from 110.0f for double resolution!
+    inline float GlobalScale = 1.1f;
+    inline float BaseUnit    = 55.0f;
 
     inline ImFont* fontHugeTitle = nullptr;
     inline ImFont* fontTitle = nullptr;
