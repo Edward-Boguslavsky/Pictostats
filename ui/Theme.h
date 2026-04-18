@@ -25,6 +25,9 @@ namespace Theme {
 
     inline float GlobalScale = 1.1f;
     inline float BaseUnit    = 55.0f;
+    inline float OverlayPadding  = 40.0f;
+    inline float DeleteBtnSize   = 24.0f;
+    inline float DeleteBtnPadding = 10.0f;
 
     inline ImFont* fontHugeTitle = nullptr;
     inline ImFont* fontTitle = nullptr;

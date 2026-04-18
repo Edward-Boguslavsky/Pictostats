@@ -64,6 +64,39 @@ void Panel::RenderVisuals(const std::vector<SensorData>& sensors) {
     }
 }
 
+void Panel::DrawDeleteButton() {
+    float btnSize = Theme::DeleteBtnSize * Theme::GlobalScale;
+    float padding = Theme::DeleteBtnPadding * Theme::GlobalScale;
+
+    ImVec2 windowPos  = ImGui::GetWindowPos();
+    ImVec2 windowSize = ImGui::GetWindowSize();
+
+    ImVec2 btnMin(windowPos.x + windowSize.x - btnSize - padding, windowPos.y + padding);
+    ImVec2 btnMax(btnMin.x + btnSize, btnMin.y + btnSize);
+
+    bool windowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
+    bool hovered = windowHovered && ImGui::IsMouseHoveringRect(btnMin, btnMax);
+    bool clicked = hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+
+    if (hovered) {
+        ImU32 bgColor = clicked ? IM_COL32(255, 50, 50, 128) : IM_COL32(255, 50, 50, 64);
+        dl->AddRectFilled(btnMin, btnMax, bgColor, 4.0f * Theme::GlobalScale);
+    }
+
+    ImGui::PushFont(Theme::fontLabel);
+    ImVec2 textSize = ImGui::CalcTextSize("X");
+    ImU32 textColor = hovered ? IM_COL32(255, 100, 100, 255) : Theme::TextMuted;
+    dl->AddText(
+        ImVec2(btnMin.x + (btnSize - textSize.x) * 0.5f, btnMin.y + (btnSize - textSize.y) * 0.5f),
+        textColor, "X"
+    );
+    ImGui::PopFont();
+
+    if (clicked) m_PendingDelete = true;
+}
+
 CpuGpuPanel::CpuGpuPanel(std::string windowID, std::string shortName, std::string title, ImU32 themeColor, PanelStyle style, int columnSpan, std::string usagePath, std::string tempPath)
     : Panel(std::move(windowID), std::move(shortName), std::move(title), themeColor, style, columnSpan), m_UsagePath(std::move(usagePath)), m_TempPath(std::move(tempPath)) {
     HardwareBackend::RegisterSensor(m_UsagePath);
@@ -88,6 +121,24 @@ void RamPanel::Draw() {
     float progress = totalRAM > 0.0f ? (usedRAM / totalRAM) : 0.0f;
     std::vector<SensorData> data = {
         { progress, FormatStr("%.0f GB", usedRAM), "USAGE" }
+    };
+    RenderVisuals(data);
+}
+
+StoragePanel::StoragePanel(std::string windowID, std::string shortName, std::string title, ImU32 themeColor, PanelStyle style, int columnSpan, std::string drivePath)
+    : Panel(std::move(windowID), std::move(shortName), std::move(title), themeColor, style, columnSpan), m_DrivePath(std::move(drivePath)) {
+    HardwareBackend::RegisterSensor(m_DrivePath + "/data/31"); // Free Space GB
+    HardwareBackend::RegisterSensor(m_DrivePath + "/data/32"); // Total Space GB
+}
+
+void StoragePanel::Draw() {
+    DrawHeader();
+    float freeGB  = HardwareBackend::GetSensorValue(m_DrivePath + "/data/31");
+    float totalGB = HardwareBackend::GetSensorValue(m_DrivePath + "/data/32");
+    float usedGB  = totalGB - freeGB;
+    float progress = (totalGB > 0.0f) ? (usedGB / totalGB) : 0.0f;
+    std::vector<SensorData> data = {
+        { progress, FormatStr("%.0f GB", usedGB), "USED" }
     };
     RenderVisuals(data);
 }
