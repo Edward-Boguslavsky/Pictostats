@@ -93,7 +93,7 @@ namespace Theme {
         ImGui::PushStyleColor(ImGuiCol_Button, accentColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(accentColor.x, accentColor.y, accentColor.z, 0.85f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(accentColor.x, accentColor.y, accentColor.z, 0.70f));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 0, 0, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(accentColor.x / 3.0f, accentColor.y / 3.0f, accentColor.z / 3.0f, 1.0f));
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Fix vertical text centering
@@ -113,7 +113,7 @@ namespace Theme {
         ImGui::PushStyleColor(ImGuiCol_Border, accentColor);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 3.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Fix vertical text centering
 
         bool pressed = ImGui::Button(label, size);
@@ -131,7 +131,7 @@ namespace Theme {
         ImGui::PushStyleColor(ImGuiCol_Border, TextMedium);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 3.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Fix vertical text centering
 
         bool pressed = ImGui::Button(label, size);

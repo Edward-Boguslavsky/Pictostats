@@ -52,18 +52,18 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
     if (ImGui::BeginPopupModal("##AddOverlayPopup", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings)) {
 
         // --- TOP FIXED HEADER ROW ---
-        ImGui::PushFont(Theme::fontTitleWide);
-        ImGui::TextColored(Theme::TextDark, "ADD A PANEL");
+        ImGui::PushFont(Theme::fontTitleDot);
+        ImGui::TextColored(Theme::TextMedium, "ADD A PANEL");
         ImGui::PopFont();
 
-        float btnW = 140.0f * Theme::GlobalScale;
-        float btnH = 48.0f * Theme::GlobalScale;
-        float spacing = 12.0f * Theme::GlobalScale;
+        float btnW = 160.0f * Theme::GlobalScale;
+        float btnH = 64.0f * Theme::GlobalScale;
+        float spacing = 18.0f * Theme::GlobalScale;
         bool doAdd = false;
 
         ImGui::SameLine(ImGui::GetWindowWidth() - (btnW * 2) - spacing - ImGui::GetStyle().WindowPadding.x);
 
-        ImGui::PushFont(Theme::fontTextWide);
+        ImGui::PushFont(Theme::fontSubtitleNum);
         if (Theme::ButtonTertiary("CANCEL", ImVec2(btnW, btnH))) {
             isOpen = false;
             ImGui::CloseCurrentPopup();
@@ -74,9 +74,8 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         }
         ImGui::PopFont();
 
-        ImGui::Dummy(ImVec2(0, 8.0f * Theme::GlobalScale));
         ImGui::Separator();
-        ImGui::Dummy(ImVec2(0, 8.0f * Theme::GlobalScale));
+        ImGui::Dummy(ImVec2(0, 4.0f * Theme::GlobalScale));
 
         // --- SCROLLABLE CONTENT REGION ---
         ImGui::BeginChild("##ScrollRegion", ImVec2(0, 0), false);
@@ -87,21 +86,21 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::PushStyleColor(ImGuiCol_Border, Theme::Vec4FromRGB(80, 80, 80)); // Faint borders for all fields
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
 
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(16.0f * Theme::GlobalScale, 14.0f * Theme::GlobalScale));
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f * Theme::GlobalScale);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f); // Enable the faint borders
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(24.0f * Theme::GlobalScale, 24.0f * Theme::GlobalScale));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f * Theme::GlobalScale);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f); // Enable the faint borders
 
         // Tighten the Y spacing so the label text sits closer to the input box beneath it
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 6.0f * Theme::GlobalScale));
 
         ImGui::PushFont(Theme::fontTextWide); // Standard font for the text typed into the inputs
 
-        ImGui::PushFont(Theme::fontSubtitleWide);
-        ImGui::TextColored(Theme::TextMedium, "STEP 1: PANEL SETTINGS");
+        ImGui::PushFont(Theme::fontSubtitleDot);
+        ImGui::TextColored(Theme::AccentRed, "PANEL SETTINGS");
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(0, 4.0f * Theme::GlobalScale));
 
-        DRAW_LABEL("STYLE");
+        DRAW_LABEL(" STYLE");
         ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
         const char* styles[] = { "Linear", "Arc" };
         if (Theme::ModernCombo("##StyleCombo", styles[m_StyleIdx])) {
@@ -110,7 +109,7 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         }
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
-        DRAW_LABEL("LAYOUT");
+        DRAW_LABEL(" LAYOUT");
         ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
         const char* counts[] = { "1 Widget", "2 Widgets", "3 Widgets" };
         if (Theme::ModernCombo("##LayoutCombo", counts[m_NumSensors - 1])) {
@@ -119,31 +118,31 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         }
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
-        DRAW_LABEL("HUGE TITLE (OPTIONAL)");
+        DRAW_LABEL(" TITLE (OPTIONAL)");
         ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
         ImGui::InputText("##HugeTitle", m_TitleBuf, sizeof(m_TitleBuf));
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
-        DRAW_LABEL("SUBTITLE (OPTIONAL)");
+        DRAW_LABEL(" SUBTITLE (OPTIONAL)");
         ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
         ImGui::InputText("##Subtitle", m_SubtitleBuf, sizeof(m_SubtitleBuf));
         ImGui::Dummy(ImVec2(0, 24.0f * Theme::GlobalScale));
 
         // --- STEP 2: WIDGET TAB SYSTEM ---
-        ImGui::PushFont(Theme::fontSubtitleWide);
-        ImGui::TextColored(Theme::TextMedium, "STEP 2: WIDGET DATA");
+        ImGui::PushFont(Theme::fontSubtitleDot);
+        ImGui::TextColored(Theme::AccentRed, "WIDGET SETTINGS");
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(0, 4.0f * Theme::GlobalScale));
 
         if (ImGui::BeginTabBar("##WidgetTabs")) {
             for (int i = 0; i < m_NumSensors; ++i) {
-                std::string tabName = "Sensor " + std::to_string(i + 1);
+                std::string tabName = "Widget " + std::to_string(i + 1);
                 if (ImGui::BeginTabItem(tabName.c_str())) {
 
                     ImGui::PushID(i);
                     ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
-                    DRAW_LABEL("HARDWARE SENSOR");
+                    DRAW_LABEL(" HARDWARE SENSOR");
                     ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
                     if (Theme::ModernCombo("##HardwareSensor", s_SimpleSensors[m_PresetIdx[i]].DisplayName)) {
                         for (int j = 0; j < s_SimpleSensors.size(); j++) {
@@ -153,12 +152,12 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
                     }
                     ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
-                    DRAW_LABEL("LABEL");
+                    DRAW_LABEL(" LABEL");
                     ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
                     ImGui::InputText("##Label", m_LabelBuf[i], sizeof(m_LabelBuf[i]));
                     ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
-                    DRAW_LABEL("UNIT");
+                    DRAW_LABEL(" UNIT");
                     ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
                     ImGui::InputText("##Unit", m_UnitBuf[i], sizeof(m_UnitBuf[i]));
 

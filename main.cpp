@@ -32,12 +32,12 @@ int main()
     Theme::fontTextWide     = io.Fonts->AddFontFromFileTTF("fonts/Blinker-Light.ttf", 32.0f * Theme::GlobalScale);
 
     // NUM (Graphs & Data)
-    Theme::fontTitleNum     = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Bold.otf", 44.0f * Theme::GlobalScale);
+    Theme::fontTitleNum     = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Light.otf", 48.0f * Theme::GlobalScale);
     Theme::fontSubtitleNum  = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Bold.otf", 36.0f * Theme::GlobalScale);
     Theme::fontTextNum      = io.Fonts->AddFontFromFileTTF("fonts/PPFraktionSans-Bold.otf", 28.0f * Theme::GlobalScale);
 
     // DOT (Stylized variants for future use)
-    Theme::fontTitleDot     = io.Fonts->AddFontFromFileTTF("fonts/Doto_Rounded-Bold.ttf", 48.0f * Theme::GlobalScale);
+    Theme::fontTitleDot     = io.Fonts->AddFontFromFileTTF("fonts/Doto_Rounded-Bold.ttf", 64.0f * Theme::GlobalScale);
     Theme::fontSubtitleDot  = io.Fonts->AddFontFromFileTTF("fonts/Doto_Rounded-Black.ttf", 42.0f * Theme::GlobalScale);
     Theme::fontTextDot      = io.Fonts->AddFontFromFileTTF("fonts/Doto_Rounded-Black.ttf", 36.0f * Theme::GlobalScale);
 
@@ -46,9 +46,9 @@ int main()
     std::vector<std::unique_ptr<Panel>> myPanels;
 
     myPanels.push_back(std::make_unique<SensorPanel>("Panel_CPU", "CPU", "AMD Ryzen 9 9900X3D", Theme::AccentRed, STYLE_ARC, 8, std::vector<SensorConfig>{ {"/amdcpu/0/load/0", "USAGE", "%.0f%%", 0.0f, 100.0f}, {"/amdcpu/0/temperature/2", "TEMP", "%.0f\xC2\xB0", 20.0f, 95.0f} }));
-    myPanels.push_back(std::make_unique<SensorPanel>("Panel_GPU", "", "NVIDIA GeForce RTX 5080", Theme::AccentBlue, STYLE_ARC, 8, std::vector<SensorConfig>{ {"/gpu-nvidia/0/load/0", "USAGE", "%.0f%%", 0.0f, 100.0f}, {"/gpu-nvidia/0/temperature/0", "TEMP", "%.0f\xC2\xB0", 20.0f, 90.0f} }));
-    myPanels.push_back(std::make_unique<SensorPanel>("Panel_RAM", "RAM", "", Theme::AccentPurple, STYLE_BAR, 8, std::vector<SensorConfig>{ {"/virtual/ram/used", "USAGE", "%.0f GB", 0.0f, 64.0f} }));
-    myPanels.push_back(std::make_unique<SensorPanel>("Panel_PWR", "", "", Theme::AccentYellow, STYLE_BAR, 8, std::vector<SensorConfig>{ {"/virtual/sys/power", "DRAW", "%.0f W", 0.0f, 1000.0f} }));
+    myPanels.push_back(std::make_unique<SensorPanel>("Panel_GPU", "GPU", "NVIDIA GeForce RTX 5080", Theme::AccentBlue, STYLE_ARC, 8, std::vector<SensorConfig>{ {"/gpu-nvidia/0/load/0", "USAGE", "%.0f%%", 0.0f, 100.0f}, {"/gpu-nvidia/0/temperature/0", "TEMP", "%.0f\xC2\xB0", 20.0f, 90.0f} }));
+    myPanels.push_back(std::make_unique<SensorPanel>("Panel_RAM", "RAM", "Team Group T-CREATE EXPERT", Theme::AccentPurple, STYLE_BAR, 8, std::vector<SensorConfig>{ {"/virtual/ram/used", "USAGE", "%.0f GB", 0.0f, 64.0f} }));
+    myPanels.push_back(std::make_unique<SensorPanel>("Panel_PWR", "PSU", "Corsair SF1000", Theme::AccentYellow, STYLE_BAR, 8, std::vector<SensorConfig>{ {"/virtual/sys/power", "DRAW", "%.0f W", 0.0f, 1000.0f} }));
 
     AddModal addModal;
 

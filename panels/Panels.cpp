@@ -24,7 +24,7 @@ void Panel::DrawHeader() {
         ImGui::PopFont();
     }
     if (!m_Title.empty()) {
-        ImGui::PushFont(Theme::fontTextWide);
+        ImGui::PushFont(Theme::fontTextNum);
         ImGui::TextColored(Theme::TextLight, "%s", m_Title.c_str());
         ImGui::PopFont();
     }
@@ -89,7 +89,7 @@ void Panel::DrawDeleteButton() {
         dl->AddRectFilled(btnMin, btnMax, bgColor, 4.0f * Theme::GlobalScale);
     }
 
-    ImGui::PushFont(Theme::fontTextWide);
+    ImGui::PushFont(Theme::fontSubtitleWide);
     ImVec2 textSize = ImGui::CalcTextSize("×");
     ImU32 textColor = hovered ? IM_COL32(255, 100, 100, 255) : Theme::ToU32(Theme::TextMedium);
     dl->AddText(ImVec2(btnMin.x + (btnSize - textSize.x) * 0.5f, btnMin.y + (btnSize - textSize.y) * 0.5f), textColor, "×");
