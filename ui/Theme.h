@@ -5,6 +5,7 @@
 
 #pragma once
 #include "imgui.h"
+#include <algorithm> // Required for std::max in color picker
 
 namespace Theme {
     inline ImVec4 Vec4FromRGB(int r, int g, int b, int a = 255) { return ImVec4(r/255.f, g/255.f, b/255.f, a/255.f); }
@@ -57,18 +58,15 @@ namespace Theme {
     inline void SetupModernTheme() {
         ImGuiStyle& style = ImGui::GetStyle();
 
-        // Window & Spacing
         style.WindowRounding   = 24.0f;
         style.WindowPadding    = ImVec2(32.0f, 32.0f);
         style.ItemSpacing      = ImVec2(24.0f, 24.0f);
         style.WindowBorderSize = 2.0f;
 
-        // Inputs, Dropdowns, Popups
         style.FramePadding     = ImVec2(16.0f * GlobalScale, 14.0f * GlobalScale);
         style.FrameRounding    = 8.0f * GlobalScale;
         style.PopupRounding    = 12.0f * GlobalScale;
 
-        // Color Mapping
         style.Colors[ImGuiCol_WindowBg]       = PanelBackground;
         style.Colors[ImGuiCol_Border]         = PanelBorder;
         style.Colors[ImGuiCol_Text]           = TextLight;
@@ -77,7 +75,6 @@ namespace Theme {
         style.Colors[ImGuiCol_FrameBgHovered] = Vec4FromRGB(45, 45, 45);
         style.Colors[ImGuiCol_FrameBgActive]  = Vec4FromRGB(55, 55, 55);
 
-        // Selection Highlights (Dropdown Options, Menus, TreeNodes)
         style.Colors[ImGuiCol_Header]         = ImVec4(AccentRed.x, AccentRed.y, AccentRed.z, 0.70f);
         style.Colors[ImGuiCol_HeaderHovered]  = ImVec4(AccentRed.x, AccentRed.y, AccentRed.z, 0.85f);
         style.Colors[ImGuiCol_HeaderActive]   = ImVec4(AccentRed.x, AccentRed.y, AccentRed.z, 1.00f);
@@ -158,5 +155,36 @@ namespace Theme {
         ImGui::PopStyleVar(3);
         ImGui::PopStyleColor(5);
         return pressed;
+    }
+
+    // Creates a square button highly rounded to look like a circle with dynamic border states
+    inline bool ColorPickerButton(const char* str_id, const ImVec2& size, ImVec4 accentColor, bool selected) {
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+
+        bool clicked = ImGui::InvisibleButton(str_id, size);
+        bool hovered = ImGui::IsItemHovered();
+
+        float rounding = 24.0f * GlobalScale;
+        float borderThickness = 6.0f * GlobalScale;
+
+        ImU32 borderColor;
+        if (selected) {
+            borderColor = ToU32(TextLight);
+        } else if (hovered) {
+            borderColor = ToU32(ImVec4(TextLight.x, TextLight.y, TextLight.z, 0.85f));
+        } else {
+            borderColor = ToU32(ImVec4(TextLight.x, TextLight.y, TextLight.z, 0.70f));
+        }
+
+        dl->AddRectFilled(p, ImVec2(p.x + size.x, p.y + size.y), borderColor, rounding);
+        dl->AddRectFilled(
+            ImVec2(p.x + borderThickness, p.y + borderThickness),
+            ImVec2(p.x + size.x - borderThickness, p.y + size.y - borderThickness),
+            ToU32(accentColor),
+            std::max(0.0f, rounding - borderThickness)
+        );
+
+        return clicked;
     }
 }

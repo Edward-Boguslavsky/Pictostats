@@ -1,4 +1,5 @@
 #include "AddModal.h"
+#include "HardwareBackend.h"
 #include "Theme.h"
 #include "imgui_internal.h"
 #include <string>
@@ -17,7 +18,6 @@ struct SimpleSensorDef {
     const char* DefaultUnit;
 };
 
-// Categorized for the dropdown UI with safe string encoding and pre-baked spaces
 static const std::vector<SimpleSensorDef> s_SimpleSensors = {
     { "CPU",     "Usage",       "CPU Usage",       "/amdcpu/0/load/0",            0.0f, 100.0f,  "USAGE", "%" },
     { "CPU",     "Temperature", "CPU Temperature", "/amdcpu/0/temperature/2",     20.0f, 95.0f,  "TEMP",  "\xC2\xB0" },
@@ -39,9 +39,9 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
 
     if (!ImGui::IsPopupOpen("##AddOverlayPopup")) {
         ImGui::OpenPopup("##AddOverlayPopup");
-        m_StyleIdx = 0; m_NumSensors = 1; m_TitleBuf[0] = '\0'; m_SubtitleBuf[0] = '\0';
+        m_StyleIdx = 0; m_NumSensors = 1; m_SelectedColorIdx = 0;
+        m_TitleBuf[0] = '\0'; m_SubtitleBuf[0] = '\0';
 
-        // Setup smart defaults based on the first item in the list
         for(int i = 0; i < 3; i++) {
             m_PresetIdx[i] = 0;
             strncpy_s(m_LabelBuf[i], sizeof(m_LabelBuf[i]), s_SimpleSensors[0].DefaultLabel, _TRUNCATE);
@@ -129,8 +129,56 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
         DRAW_LABEL(" SUBTITLE (OPTIONAL)");
-        ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
+
+        // Slightly larger button for comfortable internal padding
+        float autoBtnW = 120.0f * Theme::GlobalScale;
+        float subInputW = (Theme::ModalInputWidth * Theme::GlobalScale) - autoBtnW - (Theme::TightItemSpacing * Theme::GlobalScale);
+
+        ImGui::SetNextItemWidth(subInputW);
         ImGui::InputText("##Subtitle", m_SubtitleBuf, sizeof(m_SubtitleBuf));
+
+        // Capture height BEFORE pushing the new font to prevent vertical layout stretching!
+        float textBoxHeight = ImGui::GetFrameHeight();
+        ImGui::SameLine();
+
+        ImGui::PushFont(Theme::fontSubtitleNum);
+
+        // Use TextLight so it inherits the crisp white border of a true secondary button
+        if (Theme::ButtonSecondary("AUTO", ImVec2(autoBtnW, textBoxHeight), Theme::AccentRed)) {
+            ImGui::OpenPopup("AutoSubtitlePopup");
+        }
+        ImGui::PopFont();
+
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Border, Theme::TextMedium);
+        ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 8.0f * Theme::GlobalScale);
+        if (ImGui::BeginPopup("AutoSubtitlePopup")) {
+            ImGui::PushFont(Theme::fontTextWide);
+            for (const auto& name : HardwareBackend::GetDetectedHardwareNames()) {
+                if (ImGui::Selectable(name.c_str())) {
+                    strncpy_s(m_SubtitleBuf, sizeof(m_SubtitleBuf), name.c_str(), _TRUNCATE);
+                }
+            }
+            ImGui::PopFont();
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(2);
+
+        ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
+
+        DRAW_LABEL(" ACCENT COLOR");
+        ImVec4 colors[4] = { Theme::AccentRed, Theme::AccentBlue, Theme::AccentPurple, Theme::AccentYellow };
+        float pickerSize = ImGui::GetFrameHeight();
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) ImGui::SameLine(0, 16.0f * Theme::GlobalScale);
+            ImGui::PushID(i);
+            if (Theme::ColorPickerButton("##color", ImVec2(pickerSize, pickerSize), colors[i], m_SelectedColorIdx == i)) {
+                m_SelectedColorIdx = i;
+            }
+            ImGui::PopID();
+        }
+
         ImGui::Dummy(ImVec2(0, 24.0f * Theme::GlobalScale));
 
         // --- STEP 2: WIDGET TAB SYSTEM ---
@@ -181,7 +229,6 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
                             ImGui::PushID(j);
                             ImGui::Indent(16.0f * Theme::GlobalScale);
 
-                            // Auto-populate when user selects a new combo item
                             if (ImGui::Selectable(s_SimpleSensors[j].DisplayName, m_PresetIdx[i] == j)) {
                                 m_PresetIdx[i] = j;
                                 strncpy_s(m_LabelBuf[i], sizeof(m_LabelBuf[i]), s_SimpleSensors[j].DefaultLabel, _TRUNCATE);
@@ -236,7 +283,6 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
                 std::string unitStr = m_UnitBuf[i];
                 std::string formatStr = "%.0f";
 
-                // Just escape native `%` characters, allowing the string exactly as the user typed it
                 if (!unitStr.empty()) {
                     std::string escaped;
                     for (char c : unitStr) { if (c == '%') escaped += "%%"; else escaped += c; }
@@ -246,7 +292,12 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
                 config.push_back({ sensor.Path, finalLabel, formatStr, sensor.MinValue, sensor.MaxValue });
             }
 
-            panels.push_back(std::make_unique<SensorPanel>(uniqueID, m_TitleBuf, m_SubtitleBuf, Theme::AccentRed, parsedStyle, 8, config));
+            ImVec4 finalColor = Theme::AccentRed;
+            if (m_SelectedColorIdx == 1) finalColor = Theme::AccentBlue;
+            else if (m_SelectedColorIdx == 2) finalColor = Theme::AccentPurple;
+            else if (m_SelectedColorIdx == 3) finalColor = Theme::AccentYellow;
+
+            panels.push_back(std::make_unique<SensorPanel>(uniqueID, m_TitleBuf, m_SubtitleBuf, finalColor, parsedStyle, 8, config));
             isOpen = false;
             ImGui::CloseCurrentPopup();
         }

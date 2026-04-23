@@ -5,12 +5,12 @@
 #include <mutex>
 #include <unordered_map>
 #include <atomic>
-#include <algorithm> // For std::sort
-#include <windows.h> // For CoInitializeEx
+#include <algorithm>
+#include <windows.h>
 
 int HardwareBackend::s_RamSticks = 0;
 int HardwareBackend::s_StorageDrives = 0;
-std::vector<std::string> HardwareBackend::s_AllSensors;
+std::vector<std::string> HardwareBackend::s_HardwareNames;
 
 static std::unordered_map<std::string, float> s_SensorCache;
 static std::mutex s_CacheMutex;
@@ -22,15 +22,25 @@ void HardwareBackend::Init() {
     auto hwMap = LHWM::GetHardwareSensorMap();
 
     for (const auto& kv : hwMap) {
-        // Cache every single sensor path for the Advanced Mode UI
-        s_AllSensors.push_back(kv.first);
-
         if (kv.first.find("/memory/dimm") != std::string::npos) s_RamSticks++;
         else if (kv.first.find("/nvme/") != std::string::npos || kv.first.find("SSD") != std::string::npos || kv.first.find("HDD") != std::string::npos) s_StorageDrives++;
+
+        // kv.first contains strings like "AMD Ryzen 9 9900X3D : /amdcpu/0"
+        // We split by " : /" to extract just the beautiful hardware name!
+        std::string hardwareStr = kv.first;
+        size_t delimiterPos = hardwareStr.find(" : /");
+        if (delimiterPos != std::string::npos) {
+            hardwareStr = hardwareStr.substr(0, delimiterPos);
+        }
+
+        // Add it to our list if it isn't already there
+        if (std::find(s_HardwareNames.begin(), s_HardwareNames.end(), hardwareStr) == s_HardwareNames.end()) {
+            s_HardwareNames.push_back(hardwareStr);
+        }
     }
 
-    // Sort alphabetically so the Advanced Mode dropdown is organized
-    std::sort(s_AllSensors.begin(), s_AllSensors.end());
+    // Sort alphabetically so the AUTO menu looks clean
+    std::sort(s_HardwareNames.begin(), s_HardwareNames.end());
 
     s_Running = true;
     s_WorkerThread = std::thread([]() {
@@ -73,11 +83,11 @@ void HardwareBackend::RegisterSensor(const std::string& path) {
     if (path == "/virtual/sys/power") {
         RegisterSensor("/amdcpu/0/power/0"); RegisterSensor("/gpu-nvidia/0/power/0"); RegisterSensor("/gpu-nvidia/0/load/0"); return;
     }
-    if (path == "/virtual/nvme/0/used") {
-        RegisterSensor("/nvme/0/data/31"); RegisterSensor("/nvme/0/data/32"); return;
-    }
     if (path == "/virtual/nvme/1/used") {
         RegisterSensor("/nvme/1/data/31"); RegisterSensor("/nvme/1/data/32"); return;
+    }
+    if (path == "/virtual/nvme/0/used") {
+        RegisterSensor("/nvme/0/data/31"); RegisterSensor("/nvme/0/data/32"); return;
     }
 
     std::lock_guard<std::mutex> lock(s_CacheMutex);
@@ -89,15 +99,15 @@ float HardwareBackend::GetSensorValue(const std::string& path) {
 
     if (path == "/virtual/ram/used")     return GetUsedRamGB();
     if (path == "/virtual/sys/power")    return GetTotalSystemPowerW();
-    if (path == "/virtual/nvme/0/used")  return GetSensorValue("/nvme/0/data/32") - GetSensorValue("/nvme/0/data/31");
     if (path == "/virtual/nvme/1/used")  return GetSensorValue("/nvme/1/data/32") - GetSensorValue("/nvme/1/data/31");
+    if (path == "/virtual/nvme/0/used")  return GetSensorValue("/nvme/0/data/32") - GetSensorValue("/nvme/0/data/31");
 
     std::lock_guard<std::mutex> lock(s_CacheMutex);
     return s_SensorCache[path];
 }
 
-const std::vector<std::string>& HardwareBackend::GetAvailableSensors() {
-    return s_AllSensors;
+const std::vector<std::string>& HardwareBackend::GetDetectedHardwareNames() {
+    return s_HardwareNames;
 }
 
 float HardwareBackend::GetUsedRamGB() {
@@ -112,7 +122,6 @@ float HardwareBackend::GetTotalSystemPowerW() {
     float cpuPower = GetSensorValue("/amdcpu/0/power/0");
     float gpuPower = GetSensorValue("/gpu-nvidia/0/power/0");
     float gpuLoad  = GetSensorValue("/gpu-nvidia/0/load/0");
-    // Fallback if GPU power isn't reading correctly but load is present
     if (gpuPower <= 0.1f && gpuLoad > 0.0f) gpuPower = (gpuLoad / 100.0f) * 320.0f;
     return cpuPower + gpuPower + (s_RamSticks * 4.0f) + (s_StorageDrives * 5.0f) + 25.0f;
 }

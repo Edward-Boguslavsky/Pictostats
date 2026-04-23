@@ -1,3 +1,8 @@
+#ifndef PICTOSTATS_HARDWAREBACKEND_H
+#define PICTOSTATS_HARDWAREBACKEND_H
+
+#endif //PICTOSTATS_HARDWAREBACKEND_H
+
 #pragma once
 #include <string>
 #include <vector>
@@ -14,11 +19,11 @@ public:
     static float GetUsedRamGB();
     static float GetTotalRamGB();
 
-    // NEW: Exposes all hardware paths for the future "Advanced Mode" UI
-    static const std::vector<std::string>& GetAvailableSensors();
+    // Retrieves dynamic hardware strings parsed from the host PC
+    static const std::vector<std::string>& GetDetectedHardwareNames();
 
 private:
     static int s_RamSticks;
     static int s_StorageDrives;
-    static std::vector<std::string> s_AllSensors;
+    static std::vector<std::string> s_HardwareNames;
 };
