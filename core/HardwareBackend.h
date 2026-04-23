@@ -1,10 +1,6 @@
-#ifndef PICTOSTATS_HARDWAREBACKEND_H
-#define PICTOSTATS_HARDWAREBACKEND_H
-
-#endif //PICTOSTATS_HARDWAREBACKEND_H
-
 #pragma once
 #include <string>
+#include <vector>
 
 class HardwareBackend {
 public:
@@ -18,7 +14,11 @@ public:
     static float GetUsedRamGB();
     static float GetTotalRamGB();
 
+    // NEW: Exposes all hardware paths for the future "Advanced Mode" UI
+    static const std::vector<std::string>& GetAvailableSensors();
+
 private:
     static int s_RamSticks;
     static int s_StorageDrives;
+    static std::vector<std::string> s_AllSensors;
 };

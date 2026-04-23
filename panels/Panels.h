@@ -16,9 +16,17 @@ struct SensorData {
     std::string Label;
 };
 
+struct SensorConfig {
+    std::string Path;
+    std::string Label;
+    std::string FormatStr;
+    float MinValue = 0.0f;
+    float MaxValue = 100.0f;
+};
+
 class Panel {
 public:
-    Panel(std::string windowID, std::string shortName, std::string title, ImU32 themeColor, PanelStyle style, int columnSpan);
+    Panel(std::string windowID, std::string shortName, std::string title, ImVec4 themeColor, PanelStyle style, int columnSpan);
     virtual ~Panel() = default;
 
     virtual void Draw() = 0;
@@ -33,7 +41,7 @@ protected:
     std::string m_WindowID;
     std::string m_ShortName;
     std::string m_Title;
-    ImU32 m_ThemeColor;
+    ImVec4 m_ThemeColor;
     PanelStyle m_Style;
     int m_ColumnSpan;
     bool m_PendingDelete = false;
@@ -42,30 +50,10 @@ protected:
     void RenderVisuals(const std::vector<SensorData>& sensors);
 };
 
-class CpuGpuPanel : public Panel {
+class SensorPanel : public Panel {
 public:
-    CpuGpuPanel(std::string windowID, std::string shortName, std::string title, ImU32 themeColor, PanelStyle style, int columnSpan, std::string usagePath, std::string tempPath);
+    SensorPanel(std::string windowID, std::string shortName, std::string title, ImVec4 themeColor, PanelStyle style, int columnSpan, std::vector<SensorConfig> sensors);
     void Draw() override;
 private:
-    std::string m_UsagePath, m_TempPath;
-};
-
-class RamPanel : public Panel {
-public:
-    using Panel::Panel;
-    void Draw() override;
-};
-
-class StoragePanel : public Panel {
-public:
-    StoragePanel(std::string windowID, std::string shortName, std::string title, ImU32 themeColor, PanelStyle style, int columnSpan, std::string drivePath);
-    void Draw() override;
-private:
-    std::string m_DrivePath;
-};
-
-class PowerPanel : public Panel {
-public:
-    using Panel::Panel;
-    void Draw() override;
+    std::vector<SensorConfig> m_Sensors;
 };

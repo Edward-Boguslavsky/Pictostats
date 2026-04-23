@@ -14,6 +14,7 @@ add_executable(Pictostats
         core/Application.cpp
         core/HardwareBackend.cpp
         ui/CustomWidgets.cpp
+        ui/AddModal.cpp
         panels/Panels.cpp
         libs/imgui/imgui.cpp
         libs/imgui/imgui_draw.cpp
