@@ -32,6 +32,15 @@ namespace Theme {
     inline float DeleteBtnSize    = 32.0f;
     inline float DeleteBtnPadding = 16.0f;
 
+    // --- MODAL DIMENSIONS ---
+    inline float ModalButtonWidth   = 160.0f;
+    inline float ModalButtonHeight  = 64.0f;
+    inline float ModalButtonSpacing = 18.0f;
+    inline float ModalInputWidth    = 400.0f;
+    inline float ModalPadding       = 24.0f;
+    inline float ModalRounding      = 16.0f;
+    inline float TightItemSpacing   = 6.0f;
+
     // --- FONTS ---
     inline ImFont* fontTitleWide    = nullptr;
     inline ImFont* fontSubtitleWide = nullptr;
@@ -67,22 +76,32 @@ namespace Theme {
         style.Colors[ImGuiCol_FrameBg]        = Vec4FromRGB(30, 30, 30);
         style.Colors[ImGuiCol_FrameBgHovered] = Vec4FromRGB(45, 45, 45);
         style.Colors[ImGuiCol_FrameBgActive]  = Vec4FromRGB(55, 55, 55);
+
+        // Selection Highlights (Dropdown Options, Menus, TreeNodes)
+        style.Colors[ImGuiCol_Header]         = ImVec4(AccentRed.x, AccentRed.y, AccentRed.z, 0.70f);
+        style.Colors[ImGuiCol_HeaderHovered]  = ImVec4(AccentRed.x, AccentRed.y, AccentRed.z, 0.85f);
+        style.Colors[ImGuiCol_HeaderActive]   = ImVec4(AccentRed.x, AccentRed.y, AccentRed.z, 1.00f);
     }
 
     // --- UNIVERSAL WIDGET HELPERS ---
 
     inline bool ModernCombo(const char* label, const char* preview_value) {
-        bool open = ImGui::BeginCombo(label, preview_value, ImGuiComboFlags_NoArrowButton);
-        ImVec2 min = ImGui::GetItemRectMin();
-        ImVec2 max = ImGui::GetItemRectMax();
         ImDrawList* dl = ImGui::GetWindowDrawList();
+
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        float width = ImGui::CalcItemWidth();
+        float height = ImGui::GetFrameHeight();
+        ImVec2 max(pos.x + width, pos.y + height);
+
+        bool open = ImGui::BeginCombo(label, preview_value, ImGuiComboFlags_NoArrowButton);
 
         float chevronHalfWidth = 8.0f * GlobalScale;
         float chevronHeight    = 4.0f * GlobalScale;
         float chevronThickness = 2.0f * GlobalScale;
-        ImVec2 center(max.x - 28.0f * GlobalScale, (min.y + max.y) * 0.5f);
+        ImVec2 center(max.x - 28.0f * GlobalScale, pos.y + height * 0.5f);
 
         float dir = open ? -1.0f : 1.0f;
+
         dl->AddLine(ImVec2(center.x - chevronHalfWidth, center.y - chevronHeight * dir), ImVec2(center.x, center.y + chevronHeight * dir), ToU32(TextMedium), chevronThickness);
         dl->AddLine(ImVec2(center.x, center.y + chevronHeight * dir), ImVec2(center.x + chevronHalfWidth, center.y - chevronHeight * dir), ToU32(TextMedium), chevronThickness);
 
@@ -93,10 +112,10 @@ namespace Theme {
         ImGui::PushStyleColor(ImGuiCol_Button, accentColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(accentColor.x, accentColor.y, accentColor.z, 0.85f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(accentColor.x, accentColor.y, accentColor.z, 0.70f));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(accentColor.x / 3.0f, accentColor.y / 3.0f, accentColor.z / 3.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, TextLight);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Fix vertical text centering
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
         bool pressed = ImGui::Button(label, size);
 
@@ -114,7 +133,7 @@ namespace Theme {
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 3.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Fix vertical text centering
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
         bool pressed = ImGui::Button(label, size);
 
@@ -132,7 +151,7 @@ namespace Theme {
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 3.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Fix vertical text centering
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
         bool pressed = ImGui::Button(label, size);
 

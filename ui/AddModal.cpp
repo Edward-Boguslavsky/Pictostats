@@ -4,26 +4,31 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 
 struct SimpleSensorDef {
+    const char* Category;
     const char* DisplayName;
+    const char* FullName;
     const char* Path;
     float MinValue;
     float MaxValue;
+    const char* DefaultLabel;
+    const char* DefaultUnit;
 };
 
+// Categorized for the dropdown UI with safe string encoding and pre-baked spaces
 static const std::vector<SimpleSensorDef> s_SimpleSensors = {
-    { "CPU Usage",       "/amdcpu/0/load/0",            0.0f, 100.0f },
-    { "CPU Temperature", "/amdcpu/0/temperature/2",     20.0f, 95.0f },
-    { "GPU Usage",       "/gpu-nvidia/0/load/0",        0.0f, 100.0f },
-    { "GPU Temperature", "/gpu-nvidia/0/temperature/0", 20.0f, 90.0f },
-    { "RAM Usage",       "/virtual/ram/used",           0.0f, 64.0f },
-    { "NVME 1 Usage",    "/virtual/nvme/1/used",        0.0f, 2000.0f },
-    { "NVME 2 Usage",    "/virtual/nvme/0/used",        0.0f, 500.0f },
-    { "PSU Draw",        "/virtual/sys/power",          0.0f, 1000.0f }
+    { "CPU",     "Usage",       "CPU Usage",       "/amdcpu/0/load/0",            0.0f, 100.0f,  "USAGE", "%" },
+    { "CPU",     "Temperature", "CPU Temperature", "/amdcpu/0/temperature/2",     20.0f, 95.0f,  "TEMP",  "\xC2\xB0" },
+    { "GPU",     "Usage",       "GPU Usage",       "/gpu-nvidia/0/load/0",        0.0f, 100.0f,  "USAGE", "%" },
+    { "GPU",     "Temperature", "GPU Temperature", "/gpu-nvidia/0/temperature/0", 20.0f, 90.0f,  "TEMP",  "\xC2\xB0" },
+    { "RAM",     "Usage",       "RAM Usage",       "/virtual/ram/used",           0.0f, 64.0f,   "USAGE", " GB" },
+    { "NVME 1",  "Usage",       "NVME 1 Usage",    "/virtual/nvme/1/used",        0.0f, 2000.0f, "USED",  " GB" },
+    { "NVME 2",  "Usage",       "NVME 2 Usage",    "/virtual/nvme/0/used",        0.0f, 500.0f,  "USED",  " GB" },
+    { "PSU",     "Draw",        "PSU Draw",        "/virtual/sys/power",          0.0f, 1000.0f, "DRAW",  " W" }
 };
 
-// Helper macro to cleanly draw a small description above an input/combo field
 #define DRAW_LABEL(text) \
     ImGui::PushFont(Theme::fontTextNum); \
     ImGui::TextColored(Theme::TextMedium, text); \
@@ -35,10 +40,12 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
     if (!ImGui::IsPopupOpen("##AddOverlayPopup")) {
         ImGui::OpenPopup("##AddOverlayPopup");
         m_StyleIdx = 0; m_NumSensors = 1; m_TitleBuf[0] = '\0'; m_SubtitleBuf[0] = '\0';
+
+        // Setup smart defaults based on the first item in the list
         for(int i = 0; i < 3; i++) {
             m_PresetIdx[i] = 0;
-            strncpy_s(m_LabelBuf[i], sizeof(m_LabelBuf[i]), "Usage", _TRUNCATE);
-            strncpy_s(m_UnitBuf[i], sizeof(m_UnitBuf[i]), "%", _TRUNCATE);
+            strncpy_s(m_LabelBuf[i], sizeof(m_LabelBuf[i]), s_SimpleSensors[0].DefaultLabel, _TRUNCATE);
+            strncpy_s(m_UnitBuf[i], sizeof(m_UnitBuf[i]), s_SimpleSensors[0].DefaultUnit, _TRUNCATE);
         }
     }
 
@@ -56,9 +63,9 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::TextColored(Theme::TextMedium, "ADD A PANEL");
         ImGui::PopFont();
 
-        float btnW = 160.0f * Theme::GlobalScale;
-        float btnH = 64.0f * Theme::GlobalScale;
-        float spacing = 18.0f * Theme::GlobalScale;
+        float btnW = Theme::ModalButtonWidth * Theme::GlobalScale;
+        float btnH = Theme::ModalButtonHeight * Theme::GlobalScale;
+        float spacing = Theme::ModalButtonSpacing * Theme::GlobalScale;
         bool doAdd = false;
 
         ImGui::SameLine(ImGui::GetWindowWidth() - (btnW * 2) - spacing - ImGui::GetStyle().WindowPadding.x);
@@ -83,17 +90,15 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.18f, 0.18f, 0.18f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.22f, 0.22f, 0.22f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_Border, Theme::Vec4FromRGB(80, 80, 80)); // Faint borders for all fields
+        ImGui::PushStyleColor(ImGuiCol_Border, Theme::Vec4FromRGB(80, 80, 80));
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
 
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(24.0f * Theme::GlobalScale, 24.0f * Theme::GlobalScale));
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 16.0f * Theme::GlobalScale);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f); // Enable the faint borders
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(Theme::ModalPadding * Theme::GlobalScale, Theme::ModalPadding * Theme::GlobalScale));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, Theme::ModalRounding * Theme::GlobalScale);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, Theme::TightItemSpacing * Theme::GlobalScale));
 
-        // Tighten the Y spacing so the label text sits closer to the input box beneath it
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 6.0f * Theme::GlobalScale));
-
-        ImGui::PushFont(Theme::fontTextWide); // Standard font for the text typed into the inputs
+        ImGui::PushFont(Theme::fontTextWide);
 
         ImGui::PushFont(Theme::fontSubtitleDot);
         ImGui::TextColored(Theme::AccentRed, "PANEL SETTINGS");
@@ -101,7 +106,7 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::Dummy(ImVec2(0, 4.0f * Theme::GlobalScale));
 
         DRAW_LABEL(" STYLE");
-        ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
+        ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
         const char* styles[] = { "Linear", "Arc" };
         if (Theme::ModernCombo("##StyleCombo", styles[m_StyleIdx])) {
             for (int i = 0; i < 2; i++) if (ImGui::Selectable(styles[i], m_StyleIdx == i)) m_StyleIdx = i;
@@ -110,7 +115,7 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
         DRAW_LABEL(" LAYOUT");
-        ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
+        ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
         const char* counts[] = { "1 Widget", "2 Widgets", "3 Widgets" };
         if (Theme::ModernCombo("##LayoutCombo", counts[m_NumSensors - 1])) {
             for (int i = 0; i < 3; i++) if (ImGui::Selectable(counts[i], m_NumSensors == (i + 1))) m_NumSensors = i + 1;
@@ -119,12 +124,12 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
         DRAW_LABEL(" TITLE (OPTIONAL)");
-        ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
+        ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
         ImGui::InputText("##HugeTitle", m_TitleBuf, sizeof(m_TitleBuf));
         ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
         DRAW_LABEL(" SUBTITLE (OPTIONAL)");
-        ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
+        ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
         ImGui::InputText("##Subtitle", m_SubtitleBuf, sizeof(m_SubtitleBuf));
         ImGui::Dummy(ImVec2(0, 24.0f * Theme::GlobalScale));
 
@@ -134,39 +139,84 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(0, 4.0f * Theme::GlobalScale));
 
+        ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, Theme::ModalRounding * Theme::GlobalScale);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(32.0f * Theme::GlobalScale, 24.0f * Theme::GlobalScale));
+
+        ImGui::PushStyleColor(ImGuiCol_Tab, Theme::TextDark);
+        ImGui::PushStyleColor(ImGuiCol_Text, Theme::TextLight);
+        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(Theme::AccentRed.x, Theme::AccentRed.y, Theme::AccentRed.z, 0.70f));
+        ImGui::PushStyleColor(ImGuiCol_TabActive, Theme::AccentRed);
+
+        ImGui::PushFont(Theme::fontTextNum);
+
         if (ImGui::BeginTabBar("##WidgetTabs")) {
             for (int i = 0; i < m_NumSensors; ++i) {
-                std::string tabName = "Widget " + std::to_string(i + 1);
+                std::string tabName = "WIDGET " + std::to_string(i + 1);
+
                 if (ImGui::BeginTabItem(tabName.c_str())) {
+
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(Theme::ModalPadding * Theme::GlobalScale, Theme::ModalPadding * Theme::GlobalScale));
+                    ImGui::PushFont(Theme::fontTextWide);
 
                     ImGui::PushID(i);
                     ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
                     DRAW_LABEL(" HARDWARE SENSOR");
-                    ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
-                    if (Theme::ModernCombo("##HardwareSensor", s_SimpleSensors[m_PresetIdx[i]].DisplayName)) {
+                    ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
+
+                    if (Theme::ModernCombo("##HardwareSensor", s_SimpleSensors[m_PresetIdx[i]].FullName)) {
+                        const char* lastCategory = nullptr;
+
                         for (int j = 0; j < s_SimpleSensors.size(); j++) {
-                            if (ImGui::Selectable(s_SimpleSensors[j].DisplayName, m_PresetIdx[i] == j)) m_PresetIdx[i] = j;
+                            if (lastCategory == nullptr || strcmp(lastCategory, s_SimpleSensors[j].Category) != 0) {
+                                if (j != 0) ImGui::Dummy(ImVec2(0, 8.0f * Theme::GlobalScale));
+
+                                ImGui::PushFont(Theme::fontSubtitleNum);
+                                ImGui::TextColored(Theme::TextDark, " %s", s_SimpleSensors[j].Category);
+                                ImGui::PopFont();
+
+                                lastCategory = s_SimpleSensors[j].Category;
+                            }
+
+                            ImGui::PushID(j);
+                            ImGui::Indent(16.0f * Theme::GlobalScale);
+
+                            // Auto-populate when user selects a new combo item
+                            if (ImGui::Selectable(s_SimpleSensors[j].DisplayName, m_PresetIdx[i] == j)) {
+                                m_PresetIdx[i] = j;
+                                strncpy_s(m_LabelBuf[i], sizeof(m_LabelBuf[i]), s_SimpleSensors[j].DefaultLabel, _TRUNCATE);
+                                strncpy_s(m_UnitBuf[i], sizeof(m_UnitBuf[i]), s_SimpleSensors[j].DefaultUnit, _TRUNCATE);
+                            }
+
+                            ImGui::Unindent(16.0f * Theme::GlobalScale);
+                            ImGui::PopID();
                         }
                         ImGui::EndCombo();
                     }
                     ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
                     DRAW_LABEL(" LABEL");
-                    ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
+                    ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
                     ImGui::InputText("##Label", m_LabelBuf[i], sizeof(m_LabelBuf[i]));
                     ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
 
                     DRAW_LABEL(" UNIT");
-                    ImGui::SetNextItemWidth(400.0f * Theme::GlobalScale);
+                    ImGui::SetNextItemWidth(Theme::ModalInputWidth * Theme::GlobalScale);
                     ImGui::InputText("##Unit", m_UnitBuf[i], sizeof(m_UnitBuf[i]));
 
                     ImGui::PopID();
+                    ImGui::PopFont();
+                    ImGui::PopStyleVar();
+
                     ImGui::EndTabItem();
                 }
             }
             ImGui::EndTabBar();
         }
+
+        ImGui::PopFont();
+        ImGui::PopStyleColor(4);
+        ImGui::PopStyleVar(2);
 
         ImGui::PopFont();
         ImGui::PopStyleVar(4);
@@ -181,19 +231,18 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
 
             for (int i = 0; i < m_NumSensors; i++) {
                 const auto& sensor = s_SimpleSensors[m_PresetIdx[i]];
-                std::string finalLabel = m_LabelBuf[i];
-                std::transform(finalLabel.begin(), finalLabel.end(), finalLabel.begin(), ::toupper);
 
+                std::string finalLabel = m_LabelBuf[i];
                 std::string unitStr = m_UnitBuf[i];
                 std::string formatStr = "%.0f";
+
+                // Just escape native `%` characters, allowing the string exactly as the user typed it
                 if (!unitStr.empty()) {
-                    if (unitStr == "%") formatStr += "%%";
-                    else {
-                        std::string escaped;
-                        for (char c : unitStr) { if (c == '%') escaped += "%%"; else escaped += c; }
-                        formatStr += " " + escaped;
-                    }
+                    std::string escaped;
+                    for (char c : unitStr) { if (c == '%') escaped += "%%"; else escaped += c; }
+                    formatStr += escaped;
                 }
+
                 config.push_back({ sensor.Path, finalLabel, formatStr, sensor.MinValue, sensor.MaxValue });
             }
 
