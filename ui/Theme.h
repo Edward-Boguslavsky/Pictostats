@@ -22,9 +22,11 @@ namespace Theme {
 
     inline ImVec4 ArcTrackColor   = Vec4FromRGB(35, 35, 35);
     inline ImVec4 AccentRed       = Vec4FromRGB(255, 0, 51);
-    inline ImVec4 AccentBlue      = Vec4FromRGB(43, 112, 255);
-    inline ImVec4 AccentPurple    = Vec4FromRGB(163, 113, 247);
-    inline ImVec4 AccentYellow    = Vec4FromRGB(255, 193, 7);
+    inline ImVec4 AccentYellow    = Vec4FromRGB(246, 166, 0);
+    inline ImVec4 AccentGreen     = Vec4FromRGB(0, 170, 35);
+    inline ImVec4 AccentTeal     = Vec4FromRGB(0, 177, 153);
+    inline ImVec4 AccentBlue      = Vec4FromRGB(0, 131, 255);
+    inline ImVec4 AccentPurple    = Vec4FromRGB(166, 80, 255);
 
     // --- DIMENSIONS ---
     inline float GlobalScale      = 1.1f;

@@ -165,12 +165,10 @@ void AddModal::Render(bool& isOpen, int appWidth, int appHeight, std::vector<std
         ImGui::PopStyleVar();
         ImGui::PopStyleColor(2);
 
-        ImGui::Dummy(ImVec2(0, 12.0f * Theme::GlobalScale));
-
         DRAW_LABEL(" ACCENT COLOR");
-        ImVec4 colors[4] = { Theme::AccentRed, Theme::AccentBlue, Theme::AccentPurple, Theme::AccentYellow };
+        ImVec4 colors[6] = { Theme::AccentRed, Theme::AccentYellow, Theme::AccentGreen, Theme::AccentTeal, Theme::AccentBlue, Theme::AccentPurple };
         float pickerSize = ImGui::GetFrameHeight();
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 6; i++) {
             if (i > 0) ImGui::SameLine(0, 16.0f * Theme::GlobalScale);
             ImGui::PushID(i);
             if (Theme::ColorPickerButton("##color", ImVec2(pickerSize, pickerSize), colors[i], m_SelectedColorIdx == i)) {
